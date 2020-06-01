@@ -16,14 +16,14 @@
     <header>
       <nav class="navbar navbar-dark bg-dark">
         <a class="navbar-brand" href="#"><h4>AskReactor</h4></a>
-        <form class="form-inline my-0 my-lg-0">
-          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success mx-sm-0" type="submit">Search</button>
-        </form>
-        <div>
-          <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Log in</button>
-          <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Register</button>
-        </div>
+          <form class="form-inline my-0 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success mx-sm-0" type="submit">Search</button>
+          </form>
+          <div>
+            <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Log in</button>
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Register</button>
+          </div>
       </nav>
     </header>
 
@@ -31,25 +31,44 @@
       <main role="main" class="container">
         <div class="row">
           <div class="col-md-8 blog-main">
-            <h3 class="pb-2 mb-2 border-bottom">New question</h3>
-
+            <h3 class="pb-3 mb-4 border-bottom">Settings: Dr. Peppera</h3>
             <form>
-              <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" class="form-control" id="title" placeholder="How to build a moon park?">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="inputlogin">Login</label>
+                  <input type="text" class="form-control" id="inputlogin" placeholder="Dr-Pepper">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="inputemail">Email</label>
+                  <input type="email" class="form-control" id="inputemail" placeholder="drpepper@cola.com">
+                </div>
               </div>
 
               <div class="form-group">
-                <label for="textarea">Text</label>
-                <textarea class="form-control" id="textarea" rows="9" placeholder="Really, how? Have no idea about it."></textarea>
+                <label for="inputPassword">Password</label>
+                <input type="password" class="form-control" id="inputPassword" placeholder="********">
               </div>
 
               <div class="form-group">
-                <label for="tags">Tags</label>
-                <input type="tags" class="form-control" id="tags" placeholder="moon, park, puzzle">
+                <label for="inputnick">Nick name</label>
+                <input type="text" class="form-control" id="inputnick" placeholder="Dr. Pepper">
               </div>
 
-              <button type="submit" class="btn btn-success mb-4">Ask!</button>
+              <div>
+                <img src="img/me.jpg" class="rounded mx-0 d-block mb-3" style="max-width: 150px;">
+              </div>
+
+              <div class="input-group mb-3">
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04">
+                  <label class="custom-file-label" for="inputGroupFile04">Change avatar</label>
+                </div>
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Choose</button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-success mb-3">Save</button>
             </form>
           </div><!-- /.blog-main -->
 
@@ -79,9 +98,7 @@
               </ol>
             </div>
           </aside><!-- /.blog-sidebar -->
-
         </div><!-- /.row -->
-
       </main>
     </section>
 
