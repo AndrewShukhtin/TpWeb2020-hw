@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h3 class="pb-3 mb-4 font-italic border-bottom">
+    Tag:
+  <a class="p-4 refs" href="#">{{ tag }}</a></h3>
+    {% for question in questions %}
+      {% include 'inc/question.html' %}
+    {% endfor %}
+  {% include 'inc/pagination.html' %}
+{% endblock content %}

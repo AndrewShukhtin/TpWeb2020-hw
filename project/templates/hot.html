@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h3 class="pb-3 mb-4 font-italic border-bottom">
+    Hot Questions
+  </h3>
+  {% for question in questions %}
+    {% include 'inc/question.html' %}
+  {% endfor %}
+  {% include 'inc/pagination.html' %}
+{% endblock content %}

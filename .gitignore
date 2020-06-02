@@ -1,3 +1,7 @@
 # npm
 node_modules/
 package-lock.json
+project/venv
+
+#ide
+.vscode

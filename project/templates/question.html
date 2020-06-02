@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+  <div class="contatiner mb-4 border-bottom">
+    <div class="row">
+      <div class="col-1 col-md-2">
+        <img src="{% static 'img/me.jpg' %}" class="rounded border mr-3 ml-1 mt-1 mb-3" style="max-width: 100px;">
+        <input class="mr-3 ml-1 mt-1 pl-2" min="4" max="6" value="5" type="number" style="width: 50px; display: inline-block;">
+      </div>
+      <div class="col mb-1">
+        <h3 class="pb-3 mb-1">
+          {{ question.title }}
+        </h3>
+        <p class="mt-1">
+          {{ question.text }}
+        </p>
+        <div>
+          Tags:
+          {% for tag_ in question.tags %}
+            <a href="{% url 'tag' tag=tag_ %}" class="refs mr-1">{{ tag_ }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% for answer in answers %}
+    {% include 'inc/answer.html' %}
+  {% endfor %}
+  {% include 'inc/pagination.html' %}
+{% endblock content %}

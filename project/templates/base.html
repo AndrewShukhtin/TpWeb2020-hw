@@ -1,0 +1,33 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="css/bootstrap.css"> -->
+
+    <title>AskReactor</title>
+  </head>
+
+  <body>
+    {% include 'inc/navbar.html' %}
+
+    <section>
+      <main role="main" class="container">
+        <div class="row">
+          <div class="col-md-8 blog-main">
+            {% block content %}{% endblock content %}
+          </div><!-- /.blog-main -->
+            {% include 'inc/right_menu.html' %}
+        </div><!-- /.row -->
+      </main>
+    </section>
+
+    {% include 'inc/footer.html' %}
+  </body>
+</html>

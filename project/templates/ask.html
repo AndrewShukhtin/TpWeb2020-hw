@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h3 class="pb-2 mb-2 border-bottom">New question</h3>
+  <form>
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" class="form-control" id="title" placeholder="How to build a moon park?">
+    </div>
+
+    <div class="form-group">
+      <label for="textarea">Text</label>
+      <textarea class="form-control" id="textarea" rows="9" placeholder="Really, how? Have no idea about it."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="tags">Tags</label>
+      <input type="tags" class="form-control" id="tags" placeholder="moon, park, puzzle">
+    </div>
+
+    <button type="submit" class="btn btn-success mb-4">Ask!</button>
+  </form>
+{% endblock content %}
