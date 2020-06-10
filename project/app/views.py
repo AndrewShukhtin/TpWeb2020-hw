@@ -69,8 +69,8 @@ def paginate(objects_list, request):
 def index(request):
   questions, paginates_range = paginate(list(HARD_CODE_questions.values()), request)
   return render(request, 'index.html', {
-                         'questions': questions
-                         'paginates': paginates_range,
+                         'questions' : questions,
+                         'paginates' : paginates_range,
   })
 
 
@@ -89,8 +89,8 @@ def ask(request):
 def hot(request):
   questions, paginates_range = paginate(list(HARD_CODE_questions.values()), request)
   return render(request, 'hot.html', {
-                         'questions': questions,
-                         'paginates': paginates_range,
+                         'questions' : questions,
+                         'paginates' : paginates_range,
   })
 
 

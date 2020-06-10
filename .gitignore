@@ -5,3 +5,6 @@ project/venv
 
 #ide
 .vscode
+
+#python
+*.pyc
