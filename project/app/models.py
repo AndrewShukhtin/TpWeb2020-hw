@@ -1,146 +1,162 @@
-from django.db import models
-from django.contrib.auth.models import User
+from django.db import models as DjangoDBModels
+from django.contrib.auth import models as DjangoAuthModels
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from datetime import datetime
 
 
-def answer_helper(answer):
-  answer.likes_count = len(LikeForAnswer.objects.filter(answer=answer))
-  answer.photo = Profile.objects.get(user = answer.author).avatar
-  return answer
-
-
-def question_helper(question):
-  question.answers_count = len(Answer.objects.filter(question=question))
-  question.likes_count = len(LikeForQuestion.objects.filter(like=question))
-  question.photo = Profile.objects.get(user = question.author).avatar
-  return question
-
-
-class Profile(models.Model):
-  user = models.OneToOneField(
-    User,
-    on_delete = models.CASCADE,
+class Profile(DjangoDBModels.Model):
+  user = DjangoDBModels.OneToOneField(
+    DjangoAuthModels.User,
+    on_delete = DjangoDBModels.CASCADE,
     db_index  = True
   )
 
-  avatar = models.CharField(
+  avatar = DjangoDBModels.CharField(
     max_length = 90,
-    default="/img/me.jpg"
   )
 
 
-class Tag(models.Model):
-  name = models.CharField(
+class Tag(DjangoDBModels.Model):
+  name = DjangoDBModels.CharField(
     max_length   = 50,
-    verbose_name = u"Tag"
+    verbose_name = u"Tag",
+    unique       = True,
   )
 
   def __str__(self):
       return self.name
 
 
-class QuestionManager(models.Manager):
+class QuestionManager(DjangoDBModels.Manager):
   def get_by_tag(self, tag):
-    return super().get_queryset().filter(tags=tag)
+    return super().get_queryset().filter(tags = tag)
 
   def get_hot(self):
-    hotest = map(question_helper, super().get_queryset())
-    return sorted(hotest, 
-      key = lambda question: question.answers_count, 
-      reverse=True
-    )
+    return super().get_queryset().order_by('-likes_count')
 
 
-class Question(models.Model):
-  title = models.CharField(
-      max_length   = 100,
-      verbose_name = u"Заголовок вопроса..."
-    )
+class Question(DjangoDBModels.Model):
+  title = DjangoDBModels.CharField(
+    max_length   = 100,
+    verbose_name = u"Заголовок вопроса"
+  )
 
-  text  = models.CharField(
-      max_length   = 1000,
-      verbose_name = u"Поле вопроса..."
-    )
+  text = DjangoDBModels.CharField(
+    max_length   = 1000,
+    verbose_name = u"Поле вопроса..."
+  )
 
-  create_date = models.DateTimeField(
-      default      = datetime.now,
-      verbose_name = u"Время создания вопроса"
-    )
+  create_date = DjangoDBModels.DateTimeField(
+    default      = datetime.now,
+    verbose_name = u"Время создания вопроса"
+  )
 
-  likes_count = models.PositiveIntegerField(
-      default = 0
-    )
+  is_active = DjangoDBModels.BooleanField(
+    default      = True,
+    verbose_name = u"Доступность вопроса"
+  )
 
-  answer_count = models.PositiveIntegerField(
-      default = 0
-    )
+  likes_count = DjangoDBModels.PositiveIntegerField(
+    default = 0
+  )
 
-  author = models.ForeignKey(
-      User,
-      on_delete = models.CASCADE,
-      db_index = True
-    )
+  answers_count = DjangoDBModels.PositiveIntegerField(
+    default = 0
+  )
 
-  tags = models.ManyToManyField(
+  author = DjangoDBModels.ForeignKey(
+    DjangoAuthModels.User,
+    on_delete = DjangoDBModels.CASCADE,
+    db_index  = True
+  )
+
+  tags = DjangoDBModels.ManyToManyField(
     Tag,
     db_index = True
   )
 
+  objects = QuestionManager()
+
+  photo = DjangoDBModels.CharField(
+    default     = u"/img/snegovik.jpeg",
+    max_length  = 120
+  )
+
+  def like(self, like_object):
+    if like_object not in Like.objects.all():
+      self.likes_count += 1
+    self.save()
+
+  def add_answer(self, answer_object):
+    if answer_object not in Question.objects.all():
+      self.answers_count += 1
+      self.save()
+
   def __unicode__(self):
+    return self.title
+
+  def __str__(self):
     return self.title
 
   class Meta:
     ordering = ['-create_date']
 
 
-class AnswerManager(models.Manager):
-    def get_by_question(self, question):
-        return super().get_queryset().filter(question=question)
+class AnswerManager(DjangoDBModels.Manager):
+  def get_by_question(self, question):
+    return super().get_queryset().filter(question = question)
 
 
-class Answer(models.Model):
-  text = models.TextField(
-    verbose_name=u"Поле ответа..."
-  )
+class Answer(DjangoDBModels.Model):
+  text = DjangoDBModels.TextField(verbose_name = u"Поле ответа....")
 
-  question = models.ForeignKey(
+  likes_count = DjangoDBModels.PositiveIntegerField(default = 0)
+
+  photo = DjangoDBModels.CharField(default = u"/img/me.jpg",
+                           max_length = 120)
+
+  question = DjangoDBModels.ForeignKey(
     Question,
-    on_delete=models.CASCADE,
-    db_index=True
+    on_delete = DjangoDBModels.CASCADE,
+    db_index  = True
   )
 
-  author = models.ForeignKey(
-    User,
-    on_delete=models.CASCADE,
-    db_index=True
+  author = DjangoDBModels.ForeignKey(
+    DjangoAuthModels.User,
+    on_delete = DjangoDBModels.CASCADE,
+    db_index  = True
   )
 
   objects = AnswerManager()
 
+  def save(self, *args, **kwargs):
+    self.question.add_answer(self)
+    self.photo = Profile.objects.get(user=self.author).avatar
+    super(Answer, self).save(*args, **kwargs)
 
-class LikeForAnswer(models.Model):
-  user = models.ForeignKey(
-    User,
-    on_delete   = models.CASCADE,
-    related_name= "User"
+  def like(self, like_object):
+    if like_object not in Like.objects.all():
+      self.likes_count += 1
+    super(Answer, self).save()
+
+
+class Like(DjangoDBModels.Model):
+  content_type = DjangoDBModels.ForeignKey(
+    ContentType,
+    on_delete = DjangoDBModels.CASCADE
   )
 
-  answer = models.ForeignKey(
-    Answer,
-    on_delete    = models.CASCADE,
-    related_name ="Answer"
-  )
+  object_id = DjangoDBModels.PositiveIntegerField()
+  
+  content_object = GenericForeignKey('content_type', 'object_id')
 
+  def save(self, *args, **kwargs):
+    self.content_object.like(self)
+    super(Like, self).save(*args, **kwargs)
 
-class LikeForQuestion(models.Model):
-  user = models.ForeignKey(
-    User,
-    on_delete = models.CASCADE,
-    db_index  = True
-  )
-
-  like = models.ForeignKey(
-    Question,
-    on_delete = models.CASCADE,
+  user = DjangoDBModels.ForeignKey(
+    DjangoAuthModels.User,
+    on_delete=DjangoDBModels.CASCADE,
     db_index  = True
   )
