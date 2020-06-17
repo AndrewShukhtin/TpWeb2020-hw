@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
-  <div class="contatiner mb-4 border-bottom">
+  <div class="contatiner mb-4">
     <div class="row">
       <div class="col-1 col-md-2">
-        <img src="{% static '' %}{{ question.photo }}" class="rounded border mr-3 ml-1 mt-1 mb-3" style="max-width: 100px;">
+        <img src="{% static '' %}{{ question.photo }}" class="rounded border mr-1 ml-1 mt-1 mb-1" style="max-width: 100px;">
+        <div class="col">
+          <p class="card-text">{{question.author}}</p>
+        </div>
         <input class="mr-3 ml-1 mt-1 pl-2 likescountform" min="{{ question.likes_count }}" max= "{{ question.likes_count }}" value="{{ question.likes_count }}" type="number">
       </div>
       <div class="col mb-1">

@@ -58,7 +58,7 @@ for i in range(20):
   Answer.objects.create(
     text     = 'Зачем тебе свич, если ты все равно постоянно играешь в Европку...',
     question = Question.objects.get(id = i),
-    author=User.objects.get(username = "vendroid"),
+    author   = User.objects.get(username = "vendroid"),
   )
 
 for i in range(20):
@@ -72,3 +72,4 @@ for i in range(1, 21):
     user = User.objects.get(username = "vendroid"),
     content_object = Answer.objects.get(id = i)
   )
+
