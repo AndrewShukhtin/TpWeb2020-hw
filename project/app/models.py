@@ -138,7 +138,7 @@ class Answer(DjangoDBModels.Model):
   def like(self, like_object):
     if like_object not in Like.objects.all():
       self.likes_count += 1
-    super(Answer, self).save()
+      super(Answer, self).save()
 
 
 class Like(DjangoDBModels.Model):

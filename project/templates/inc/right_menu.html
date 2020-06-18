@@ -1,26 +1,21 @@
 <aside class="col-md-4 blog-sidebar">
-  <div class="p-4 mb-3 bg-light rounded">
-    <h4 class="font-italic">Popular tags</h4>
+  <div class="p-3 mb-3 bg-light rounded">
+    <h4 class="">Popular tags</h4>
     <nav class="my-2 my-md-0 mr-md-3">
-      <a style="color: red; font-size: 20px" href="#">Perl</a>
-      <a class="p-2" style="color: #352f2f; font-size: 22px" href="#">Python</a>
-      <a class="p-2" style="color: #1a9900; font-size: 20px" href="#">TechnoPark</a>
-      <a class="p-2" style="color: #6267b4; font-size: 20px" href="#">MySQL</a>
-      <a class="p-5" style="color: #16eedc; font-size: 22px" href="#">django</a>
-      <a class="p-2" style="color: #e272dd; font-size: 18px" href="#">Mail.Ru</a>
-      <a class="p-2" style="color: #6267b4; font-size: 21px" href="#">Voloshin</a>
-      <a class="p-2" style="color: #d80b2d; font-size: 16px" href="#">FireFox</a>
+      {% for tag in tags %}
+        <a class="p-2" style="color: {{ tag.color }}; font-size: {{ tag.size }}px;" href="{% url 'tag' tag=tag.name %}">{{ tag.name }}</a>
+      {% endfor %}
     </nav>
   </div>
-
-  <div class="p-4 my-4">
-    <h4 class="font-italic">Best members</h4>
-    <ol class="list-unstyled">
-      <li><a class="refs" href="#">Mr. freeman</a></li>
-      <li><a class="refs" href="#">Dr. House</a></li>
-      <li><a class="refs" href="#">Bender</a></li>
-      <li><a class="refs" href="#">Queen Victoria</a></li>
-      <li><a class="refs" href="#">V.Pupkin</a></li>
+  <div class="p-3">
+    <h4>Best members</h4>
+    <ol class="list-unstyled mb-0">
+    {% for member in members %}
+        <li style="font-size: 18px">{{ member }}</li>
+    {% endfor %}
     </ol>
   </div>
+  {% comment %} <div class="p-3">
+    <a href="https://data.typeracer.com/pit/profile?user=aleksn7&ref=badge" target="_top"><img src="https://data.typeracer.com/misc/badge?user=aleksn7" border="0" alt="TypeRacer.com scorecard for user aleksn7"/></a>
+  </div> {% endcomment %}
 </aside><!-- /.blog-sidebar -->

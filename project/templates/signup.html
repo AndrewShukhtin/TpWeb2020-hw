@@ -1,40 +1,15 @@
 {% extends 'base.html' %}
+{% load bootstrap4%}
 
 {% block content %}
-  <h3 class="pb-3 mb-4 font-italic border-bottom">Registration</h3>
-  <h5 style="color: red;">Sorry, this email address allready register.</h5>
-  <form>
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="inputlogin">Login</label>
-        <input type="text" class="form-control" id="inputlogin" placeholder="dr_pepper">
-      </div>
-      <div class="form-group col-md-6">
-        <label for="inputemail">Email</label>
-        <input type="email" class="form-control" id="inputemail" placeholder="dr.pepper@mail.ru">
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="inputnick">Nickname</label>
-      <input type="text" class="form-control" id="inputnick" placeholder="dr_pepper">
-    </div>
-    <div class="form-group">
-      <label for="inputPassword4">Password</label>
-      <input type="password" class="form-control" id="inputPassword4">
-    </div>
-    <div class="form-group">
-      <label for="inputPassword">Repeat password</label>
-      <input type="password" class="form-control" id="inputPassword">
-    </div>
-    <div class="input-group mb-3">
-      <div class="custom-file">
-        <input type="file" class="custom-file-input" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04">
-        <label class="custom-file-label" for="inputGroupFile04">Upload avatar</label>
-      </div>
-      <div class="input-group-append">
-        <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Choose</button>
-      </div>
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
+  <h3 class="pb-3 mb-4 font-italic border-bottom">
+  Регистрация
+  </h3>
+  <form method="POST">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons %}
+      <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    {% endbuttons %}
   </form>
 {% endblock content %}
