@@ -2,13 +2,24 @@
 <header>
   <nav class="navbar navbar-dark bg-dark">
     <a class="navbar-brand" href="{% url 'index' %}"><h4>AskReactor</h4></a>
+
     <form class="form-inline my-0 my-lg-0">
       <input class="form-control mr-sm-2" type="search" placeholder="Search..." aria-label="Search">
       <button class="btn btn-outline-success mx-sm-0" type="submit">Search</button>
     </form>
-    <div>
-      <button onclick="window.location.href='{% url 'login' %}'" class="btn btn-outline-info my-2 my-sm-0" type="submit">Log in</button>
-      <button onclick="window.location.href='{% url 'signup' %}'" class="btn btn-outline-primary my-2 my-sm-0" type="submit">Register</button>
-    </div>
+
+    {% if user.is_authenticated %}
+      <div>
+        <h4 class="navbar-brand mx-sm-2">{{user}}</h4>
+        {% comment %} <img src="{% static '' %}{{ avatar }}" class="rounded border mx-sm-2" style="max-width: 30px;"> {% endcomment %}
+        <button onclick="window.location.href='{% url 'settings' %}'" class="btn btn-outline-info my-2 my-sm-0" type="submit">Settings</button>
+        <button onclick="window.location.href='{% url 'logout' %}'" class="btn btn-outline-primary my-2 my-sm-0" type="submit">Log out</button>
+      </div>
+    {% else %}
+      <div>
+        <button onclick="window.location.href='{% url 'login' %}'" class="btn btn-outline-info my-2 my-sm-0" type="submit">Log in</button>
+        <button onclick="window.location.href='{% url 'signup' %}'" class="btn btn-outline-primary my-2 my-sm-0" type="submit">Register</button>
+      </div>
+    {% endif %}
   </nav>
 </header>

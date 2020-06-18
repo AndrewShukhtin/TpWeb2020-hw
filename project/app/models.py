@@ -25,7 +25,7 @@ class Tag(DjangoDBModels.Model):
   )
 
   def __str__(self):
-      return self.name
+    return self.name
 
 
 class QuestionManager(DjangoDBModels.Manager):

@@ -1,6 +1,7 @@
 import re
 from django import forms
-from app.models import Question
+from app.models import Question, Profile
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth.models import User as DjangoUser
 
 
@@ -20,8 +21,8 @@ class QuestionForm(forms.Form):
   title = forms.CharField(min_length = 8)
   text  = forms.CharField(widget = forms.Textarea)
   tag   = forms.CharField(min_length = 1,
-                          label      = "Tags",
-                          help_text  = "Enter tags separated by spaces"
+                          label      = "Теги",
+                          help_text  = "Введите теги через пробел"
                         )
 
 
@@ -69,5 +70,17 @@ class RegisterForm(forms.Form):
     return repeatpassword
 
 
+class SettingsForm(forms.Form):
+  username = forms.CharField(required = False)
+  email    = forms.CharField(required = False)
+  password = forms.CharField(
+      min_length = 8,
+      widget     = forms.PasswordInput,
+      required   = False
+    )
+
+  avatar = forms.ImageField(required=False)
+
+
 class AnswerForm(forms.Form):
-    field = forms.CharField(widget=forms.Textarea)
+  field = forms.CharField(widget = forms.Textarea)

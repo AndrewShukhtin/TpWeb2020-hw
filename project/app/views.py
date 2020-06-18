@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 import random
 
 from app.models import Question, Answer, Tag, Like, Profile
-from app.forms import LoginForm, QuestionForm, RegisterForm, AnswerForm
+from app.forms import LoginForm, QuestionForm, RegisterForm, AnswerForm, SettingsForm
 from askme.settings import DEFAULT_ITEMS_COUNT_ON_PAGE
 
 
@@ -50,39 +50,48 @@ def get_top_members():
   members = [i.username for i in DjangoUser.objects.all()[:5]]
   return members
 
+def upload_image(file, user_id):
+  with open(f"static/img/{user_id}", "wb+") as f:
+    for chunk in file.chunks():
+      f.write(chunk)
+
+  return f"img/{user_id}"
+
 
 def signup(request):
+  if request.user.is_authenticated:
+    return redirect("/index")
   if request.method == "GET":
     form = RegisterForm()
   else:
-    form = RegisterForm(data = request.POST)
+    form = RegisterForm(data=request.POST, files=request.FILES)
     if form.is_valid():
-      user = DjangoUser.objects.create_user(
-              form.cleaned_data["username"],
-              form.cleaned_data["email"],
-              form.cleaned_data["password"]
-            )
-      user.is_superuser = False
-      user.is_staff     = False
-      user.save()
-      Profile.objects.create(
-          user = DjangoUser.objects.get(
-              username = form.cleaned_data["username"]
-            )
-        )
-      return redirect("/login")
+        user = DjangoUser.objects.create_user(
+            form.cleaned_data["username"],
+            form.cleaned_data["email"],
+            form.cleaned_data["password"])
+        user.is_superuser = False
+        user.is_staff     = False
+        user.save()
 
-    render(request, "signup.html", {
-                    "form"    : form,
-                    "tags"    : get_top_tags(),
-                    "members" : get_top_members()
-                  })
+        if form.cleaned_data["avatar"]:
+          image_path = upload_image(form.cleaned_data["avatar"], user.id)
+        else:
+          image_path = "img/photo.jpg"
+
+        Profile.objects.create(
+            user     = DjangoUser.objects.get(
+            username = form.cleaned_data["username"]),
+            avatar   = image_path
+        )
+
+        return redirect("/login")
 
   return render(request, "signup.html", {
-                    "form"    : form,
-                    "tags"    : get_top_tags(),
-                    "members" : get_top_members()
-                  })
+          "form"    : form,
+          "tags"    : get_top_tags(),
+          "members" : get_top_members()
+        })
 
 
 def login(request):
@@ -97,57 +106,49 @@ def login(request):
         next_ = request.GET.get("next")
         return redirect(f"{next_}")
 
-  ctx = {
-      "form"    : form,
-      "user"    : request.user,
-      "tags"    : get_top_tags(),
-      "members" : get_top_members(),
-      "previous": request.META.get("HTTP_REFERER")
-  }
-
-  return render(request, "login.html", ctx)
+  return render(request, "login.html", {
+              "form"     : form,
+              "user"     : request.user,
+              "tags"     : get_top_tags(),
+              "members"  : get_top_members(),
+              "previous" : request.META.get("HTTP_REFERER")
+          })
 
 
 @login_required
 def ask(request):
   if request.method == "GET":
     form = QuestionForm()
-    ctx = {
-        "form"   : form,
-        "user"   : request.user,
-        "tags"   : get_top_tags(),
-        "members": get_top_members()
-    }
-    return render(request, "ask.html", ctx)
+  else:
+    form = QuestionForm(data=request.POST)
+    if form.is_valid():
+      tags  = form.cleaned_data["tag"].split(" ")
+      text  = form.cleaned_data["text"]
+      title = form.cleaned_data["title"]
+      question = Question.objects.create(
+          author = request.user,
+          text   = text,
+          title  = title
+      )
 
-  form = QuestionForm(data=request.POST)
-  if form.is_valid():
-    tags  = form.cleaned_data["tag"].split(" ")
-    text  = form.cleaned_data["text"]
-    title = form.cleaned_data["title"]
-    question = Question.objects.create(
-        author = request.user, text = text, title = title
-    )
-    tags_list = []
-    for tag_name in tags:
-      try:
-        tag = Tag.objects.get(name = tag_name)
-      except Tag.DoesNotExist:
-        tag = Tag.objects.create(name = tag_name)
-      tags_list.append(tag)
-    # print(tags)
-    question.tags.set(tags_list)
-    question.save()
-    return redirect(reverse("question", kwargs={"qid": question.pk}))
+      tags_list = []
+      for tag_name in tags:
+          try:
+              tag = Tag.objects.get(name = tag_name)
+          except Tag.DoesNotExist:
+              tag = Tag.objects.create(name = tag_name)
+          tags_list.append(tag)
+      question.tags.set(tags_list)
+      question.save()
 
-  ctx = {
-      "form"   : form,
-      "user"   : request.user,
-      "tags"   : get_top_tags(),
-      "members": get_top_members(),
-  }
+      return redirect(reverse("question", kwargs={"qid": question.pk}))
 
-  return render(request, "ask.html", ctx)
+  return render(request, "ask.html", {
+                  "form"    : form,
+                  "user"    : request.user,
+                  "tags"    : get_top_tags(),
+                  "members" : get_top_members(),
+                })
 
 
 @login_required
@@ -224,3 +225,37 @@ def tag(request, tag):
                 "tags"        : get_top_tags(),
                 "members"     : get_top_members(),
   })
+
+
+@login_required
+def settings(request):
+  if request.method == "GET":
+    form = SettingsForm(initial = {
+        "username" : request.user.username,
+        "email"    : request.user.email
+    })
+  else:
+    form = SettingsForm(data = request.POST, files = request.FILES)
+    if form.is_valid():
+        user = request.user
+        if form.cleaned_data["username"] != user.username:
+            user.username = form.cleaned_data["username"]
+        if form.cleaned_data["email"] != user.email:
+            user.email = form.cleaned_data["email"]
+        if form.cleaned_data["password"]:
+            user.set_password(form.cleaned_data["password"])
+        if form.cleaned_data["avatar"]:
+            profile = Profile.objects.get(user=user)
+            profile.avatar = upload_image(
+                form.cleaned_data["avatar"], user.id)
+            # print(profile.avatar)
+            profile.save()
+        user.save()
+
+  return render(request, "settings.html", {
+              "form"    : form,
+              "user"    : request.user,
+              "tags"    : get_top_tags(),
+              "members" : get_top_members(),
+              "avatar"  : Profile.objects.get(user = request.user).avatar
+          })
