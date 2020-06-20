@@ -137,6 +137,19 @@ STATICFILES_DIRS = [
 
 LOGIN_URL = "/login"
 
+# SSL support
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT   = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE    = False
+
+# session expire at browser close
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# wsgi scheme
+os.environ['wsgi.url_scheme'] = 'https'
+
 # NOTE: Paginator const
 DEFAULT_ITEMS_COUNT_ON_PAGE = 8
 

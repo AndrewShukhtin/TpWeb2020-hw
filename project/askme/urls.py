@@ -28,6 +28,7 @@ urlpatterns = [
   path('ask/',         views.ask,         name = 'ask'),
   path('hot/',         views.hot,         name = 'hot'),
   path('settings/',    views.settings,    name = 'settings'),
+  path('',             views.base,        name = 'base'),
 
   path('question/<int:qid>', views.question, name = 'question'),
   path('tag/<str:tag>',      views.tag,      name = 'tag'),
@@ -36,4 +37,4 @@ urlpatterns = [
   path('answer/ajax/correct', views.corect_ajax, name = 'answerajaxcorrect'),
 
   url(r'^admin/', admin.site.urls),
-]
+] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

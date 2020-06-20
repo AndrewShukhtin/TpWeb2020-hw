@@ -42,23 +42,23 @@ class RegisterForm(forms.Form):
   def clean_username(self):
     username = self.cleaned_data["username"]
     if DjangoUser.objects.filter(username = username):
-      raise forms.ValidationError("This name is already taken")
+      raise forms.ValidationError("Это имя уже занято :(")
     if re.search(r"\W", username):
-      raise forms.ValidationError("Name contains invalid characters")
+      raise forms.ValidationError("Имя сожердит недопустимые символы")
 
     return username
 
   def clean_email(self):
     email = self.cleaned_data["email"]
     if not re.match(r"(^|\s)[-a-z0-9_.]+@([-a-z0-9]+\.)+[a-z]{2,6}(\s|$)", email):
-      raise forms.ValidationError("Invalid email")
+      raise forms.ValidationError("Неккоретный имейл")
 
     return email
 
   def clean_password(self):
     password = self.cleaned_data["password"]
     if " " in password:
-      raise forms.ValidationError("Whitespaces in password")
+      raise forms.ValidationError("В пароле не должно быть пробелов!")
 
     return password
 
@@ -66,7 +66,7 @@ class RegisterForm(forms.Form):
     repeatpassword = self.cleaned_data["repeatpassword"]
     password = self.cleaned_data["password"]
     if password != repeatpassword:
-      raise forms.ValidationError("Passwords do not match")
+      raise forms.ValidationError("Пароли не совпадают")
 
     return repeatpassword
 

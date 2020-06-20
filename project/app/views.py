@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.core.paginator import Paginator
 import random
+import urllib
 
 from app.models import Question, Answer, Tag, Like, Profile
 from app.forms import LoginForm, QuestionForm, RegisterForm, AnswerForm, SettingsForm
@@ -66,8 +67,6 @@ def change_photos(user):
 
 
 def signup(request):
-  if request.user.is_authenticated:
-    return redirect("/index")
   if request.method == "GET":
     form = RegisterForm()
   else:
@@ -181,6 +180,10 @@ def hot(request):
       "tags"     : get_top_tags(),
       "members"  : get_top_members(),
   })
+
+
+def base(request):
+    return redirect("index/")
 
 
 def index(request):

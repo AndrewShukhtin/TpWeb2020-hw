@@ -31,7 +31,7 @@ class Tag(DjangoDBModels.Model):
 class Like(DjangoDBModels.Model):
   content_type = DjangoDBModels.ForeignKey(
       ContentType,
-      on_delete=DjangoDBModels.CASCADE
+      on_delete = DjangoDBModels.CASCADE
   )
 
   object_id = DjangoDBModels.PositiveIntegerField()

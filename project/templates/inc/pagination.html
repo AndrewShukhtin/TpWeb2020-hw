@@ -4,7 +4,9 @@
     <li class="page-item">
     </li>
     {% for paginate in paginates %}
-      <li class="page-item"><a class="page-link" href="?page={{ paginate }}">{{ paginate }}</a></li>
+      <li class="page-item">
+      <a class="page-link" href="?page={{ paginate }}">{{ paginate }}</a>
+      </li>
     {% endfor %}
     <li class="page-item">
     </li>
