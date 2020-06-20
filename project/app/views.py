@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import admin
 from django.contrib import auth
 from django.contrib.auth import logout
@@ -10,7 +10,7 @@ import random
 
 from app.models import Question, Answer, Tag, Like, Profile
 from app.forms import LoginForm, QuestionForm, RegisterForm, AnswerForm, SettingsForm
-from askme.settings import DEFAULT_ITEMS_COUNT_ON_PAGE
+from askme.settings import DEFAULT_ITEMS_COUNT_ON_PAGE, MEDIA_URL, MEDIA_ROOT, BASE_AVATAR
 
 
 def paginate(objects_list, page_number):
@@ -51,11 +51,18 @@ def get_top_members():
   return members
 
 def upload_image(file, user_id):
-  with open(f"static/img/{user_id}", "wb+") as f:
+  with open(MEDIA_ROOT+f"/img/{user_id}", "wb+") as f:
     for chunk in file.chunks():
       f.write(chunk)
 
   return f"img/{user_id}"
+
+
+def change_photos(user):
+  for question in Question.objects.filter(author = user):
+    question.save()
+  for answer in Answer.objects.filter(author = user):
+    answer.save()
 
 
 def signup(request):
@@ -64,33 +71,34 @@ def signup(request):
   if request.method == "GET":
     form = RegisterForm()
   else:
-    form = RegisterForm(data=request.POST, files=request.FILES)
+    form = RegisterForm(data = request.POST, files = request.FILES)
     if form.is_valid():
-        user = DjangoUser.objects.create_user(
-            form.cleaned_data["username"],
-            form.cleaned_data["email"],
-            form.cleaned_data["password"])
-        user.is_superuser = False
-        user.is_staff     = False
-        user.save()
+      user = DjangoUser.objects.create_user(
+          form.cleaned_data["username"],
+          form.cleaned_data["email"],
+          form.cleaned_data["password"])
+      user.is_superuser = False
+      user.is_staff     = False
+      user.save()
 
-        if form.cleaned_data["avatar"]:
-          image_path = upload_image(form.cleaned_data["avatar"], user.id)
-        else:
-          image_path = "img/photo.jpg"
+      if form.cleaned_data["avatar"]:
+        image_path = upload_image(form.cleaned_data["avatar"], user.id)
+      else:
+        image_path = BASE_AVATAR
 
-        Profile.objects.create(
-            user     = DjangoUser.objects.get(
-            username = form.cleaned_data["username"]),
-            avatar   = image_path
-        )
+      Profile.objects.create(
+          user     = DjangoUser.objects.get(
+          username = form.cleaned_data["username"]),
+          avatar   = image_path
+      )
 
-        return redirect("/login")
+      return redirect("/login")
 
   return render(request, "signup.html", {
-          "form"    : form,
-          "tags"    : get_top_tags(),
-          "members" : get_top_members()
+          "form"      : form,
+          "tags"      : get_top_tags(),
+          "members"   : get_top_members(),
+          "MEDIA_URL" : MEDIA_URL,
         })
 
 
@@ -107,11 +115,12 @@ def login(request):
         return redirect(f"{next_}")
 
   return render(request, "login.html", {
-              "form"     : form,
-              "user"     : request.user,
-              "tags"     : get_top_tags(),
-              "members"  : get_top_members(),
-              "previous" : request.META.get("HTTP_REFERER")
+            "form"     : form,
+            "user"     : request.user,
+            "tags"     : get_top_tags(),
+            "members"  : get_top_members(),
+            "previous" : request.META.get("HTTP_REFERER"),
+            "MEDIA_URL": MEDIA_URL,
           })
 
 
@@ -133,22 +142,23 @@ def ask(request):
 
       tags_list = []
       for tag_name in tags:
-          try:
-              tag = Tag.objects.get(name = tag_name)
-          except Tag.DoesNotExist:
-              tag = Tag.objects.create(name = tag_name)
-          tags_list.append(tag)
+        try:
+          tag = Tag.objects.get(name = tag_name)
+        except Tag.DoesNotExist:
+          tag = Tag.objects.create(name = tag_name)
+        tags_list.append(tag)
       question.tags.set(tags_list)
       question.save()
 
       return redirect(reverse("question", kwargs={"qid": question.pk}))
 
   return render(request, "ask.html", {
-                  "form"    : form,
-                  "user"    : request.user,
-                  "tags"    : get_top_tags(),
-                  "members" : get_top_members(),
-                })
+            "form"      : form,
+            "user"      : request.user,
+            "tags"      : get_top_tags(),
+            "members"   : get_top_members(),
+            "MEDIA_URL" : MEDIA_URL
+          })
 
 
 @login_required
@@ -180,11 +190,12 @@ def index(request):
       )
 
   return render(request, "index.html", {
-    "questions": questions,
-    "paginates": paginates_range,
-    "user"     : request.user,
-    "tags"     : get_top_tags(),
-    "members"  : get_top_members(),
+    "questions" : questions,
+    "paginates" : paginates_range,
+    "user"      : request.user,
+    "tags"      : get_top_tags(),
+    "members"   : get_top_members(),
+    "MEDIA_URL" : MEDIA_URL,
   })
 
 
@@ -202,14 +213,17 @@ def question(request, qid):
       )
 
   answers = Answer.objects.get_by_question(question)
+
   return render(request, "question.html", {
-                "form"     : form,
-                "question" : question,
-                "answers"  : answers,
-                "user"     : request.user,
-                "tags"     : get_top_tags(),
-                "members"  : get_top_members(),
-              })
+                      "form"      : form,
+                      "question"  : question,
+                      "answers"   : answers,
+                      "is_owner"  : (question.author == request.user),
+                      "user"      : request.user,
+                      "tags"      : get_top_tags(),
+                      "members"   : get_top_members(),
+                      "MEDIA_URL" : MEDIA_URL,
+                    })
 
 
 def tag(request, tag):
@@ -224,7 +238,8 @@ def tag(request, tag):
                 "user"        : request.user,
                 "tags"        : get_top_tags(),
                 "members"     : get_top_members(),
-  })
+                "MEDIA_URL": MEDIA_URL,
+              })
 
 
 @login_required
@@ -237,25 +252,70 @@ def settings(request):
   else:
     form = SettingsForm(data = request.POST, files = request.FILES)
     if form.is_valid():
-        user = request.user
-        if form.cleaned_data["username"] != user.username:
-            user.username = form.cleaned_data["username"]
-        if form.cleaned_data["email"] != user.email:
-            user.email = form.cleaned_data["email"]
-        if form.cleaned_data["password"]:
-            user.set_password(form.cleaned_data["password"])
-        if form.cleaned_data["avatar"]:
-            profile = Profile.objects.get(user=user)
-            profile.avatar = upload_image(
-                form.cleaned_data["avatar"], user.id)
-            # print(profile.avatar)
-            profile.save()
-        user.save()
+      user = request.user
+      if form.cleaned_data["username"] != user.username:
+          user.username = form.cleaned_data["username"]
+      if form.cleaned_data["email"] != user.email:
+          user.email = form.cleaned_data["email"]
+      if form.cleaned_data["password"]:
+          user.set_password(form.cleaned_data["password"])
+      if form.cleaned_data["avatar"]:
+        profile = Profile.objects.get(user=user)
+        new_photo = upload_image(form.cleaned_data["avatar"], user.id)
+        if profile.avatar == BASE_AVATAR:
+          flag = True
+        profile.avatar = new_photo
+        profile.save()
+        if flag:
+          change_photos(user)
+      user.save()
 
   return render(request, "settings.html", {
-              "form"    : form,
-              "user"    : request.user,
-              "tags"    : get_top_tags(),
-              "members" : get_top_members(),
-              "avatar"  : Profile.objects.get(user = request.user).avatar
+              "form"      : form,
+              "user"      : request.user,
+              "tags"      : get_top_tags(),
+              "members"   : get_top_members(),
+              "avatar"    : Profile.objects.get(user = request.user).avatar,
+              "MEDIA_URL" : MEDIA_URL,
           })
+
+
+@login_required
+def ajax(request):
+  qid = int(request.POST.get("id"))
+  type_ = request.POST.get("type")
+
+  if type_ == "question":
+    object_class = Question
+  elif type_ == "answer":
+    object_class = Answer
+
+  object_ = get_object_or_404(object_class, id=qid)
+  if object_.likes.filter(user = request.user).count() == 0:
+    like = Like(
+        user           = request.user,
+        content_object = object_class.objects.get(id=qid)
+    )
+    like.save()
+    object_.likes_count += 1
+    object_.save()
+  return JsonResponse({
+      "likes_count": object_.likes_count,
+  })
+
+
+@login_required
+def corect_ajax(request):
+  qid = int(request.POST.get("id"))
+  answer = get_object_or_404(Answer, id=qid)
+  if answer.author == request.user:
+    answer.is_correct = True
+    answer.save()
+
+    return JsonResponse({
+        "is_correct": True,
+    })
+  else:
+    return JsonResponse({
+        "is_correct": False,
+    })

@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url, include
+from django.conf.urls.static import static
+from django.conf import settings
 from app import views
 
 urlpatterns = [
@@ -29,6 +31,9 @@ urlpatterns = [
 
   path('question/<int:qid>', views.question, name = 'question'),
   path('tag/<str:tag>',      views.tag,      name = 'tag'),
+
+  path('ajax/',               views.ajax,        name = 'ajax'),
+  path('answer/ajax/correct', views.corect_ajax, name = 'answerajaxcorrect'),
 
   url(r'^admin/', admin.site.urls),
 ]

@@ -3,24 +3,38 @@
 <div class="contatiner border rounded mb-4">
   <div class="row">
     <div class="col-1">
-      <img src="{% static '' %}{{ answer.photo }}" class="rounded border mr-3 ml-1 mt-1" style="max-width: 60px;">
+      <img src="{% MEDIA_URL %}{{ answer.photo }}" 
+           class="rounded border mr-3 ml-1 mt-1" 
+           style="max-width: 60px;"
+      >
       <div>
         <p class="card-text">{{answer.author}}</p>
       </div>
-      <input class="mr-3 ml-1 mt-1 pl-1 mb-1 likescountform" value="{{ answer.likes_count }}" type="number" style="width: 50px; display: inline-block;">
+      <input class="mr-3 ml-1 mt-1 pl-2 mb-1 likescountform" 
+             id="answer{{ answer.id }}" 
+             min="{{ answer.likes_count }}" 
+             max="{{ answer.likes_count }}" 
+             value="{{ answer.likes_count }}" 
+             type="number"
+      >
+      {% if user.is_authenticated %}
+        <button onclick="create_like({{ answer.id }}, 'answer')">like</button>
+      {% endif %}
     </div>
-    <div class="col mb-1">
-      <div class="col mb-2">
+      <div class="col mb-1">
         <p class="mt-1">
           {{ answer.text }}
         </p>
+        {% if answer.is_correct %}
+          <label>Correct!</label>
+        {% else %}
+          <label id="correct{{ answer.id }}"></label>
+        {% endif %}
+        {% if is_owner and not answer.is_correct %}
+          <button id="button{{ answer.id}}" 
+                  onclick="mark_as_correct({{ answer.id }})">Correct
+          </button>
+        {% endif %}
       </div>
-      <div class="form-check mr-3 mt-3 ml-3 mb-3">
-        <input class="form-check-input" type="checkbox" id="gridCheck">
-        <label class="form-check-label">
-          Correct!
-        </label>
-      </div>
-    </div>
   </div>
 </div>

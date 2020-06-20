@@ -5,7 +5,9 @@
   <h3 class="pb-3 mb-4 font-italic border-bottom">
   Log In
   </h3>
-  <form action="/login/?next={{ previous }}" class="mb-4" method="POST">
+  <form action="{% url 'login' %}?next={{ previous }}"  
+        class="mb-4" 
+        method="POST">
     {% csrf_token %}
     {% bootstrap_form form %}
     {% buttons %}

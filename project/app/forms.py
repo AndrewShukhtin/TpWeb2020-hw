@@ -29,6 +29,7 @@ class QuestionForm(forms.Form):
 class RegisterForm(forms.Form):
   username = forms.CharField()
   email    = forms.CharField()
+  avatar   = forms.ImageField(required = False)
   password = forms.CharField(
                 min_length = 8,
                 widget     = forms.PasswordInput

@@ -1,7 +1,7 @@
 from django.db import models as DjangoDBModels
 from django.contrib.auth import models as DjangoAuthModels
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from datetime import datetime
 
 
@@ -28,6 +28,27 @@ class Tag(DjangoDBModels.Model):
     return self.name
 
 
+class Like(DjangoDBModels.Model):
+  content_type = DjangoDBModels.ForeignKey(
+      ContentType,
+      on_delete=DjangoDBModels.CASCADE
+  )
+
+  object_id = DjangoDBModels.PositiveIntegerField()
+
+  content_object = GenericForeignKey('content_type', 'object_id')
+
+  def save(self, *args, **kwargs):
+    self.content_object.like(self)
+    super(Like, self).save(*args, **kwargs)
+
+  user = DjangoDBModels.ForeignKey(
+      DjangoAuthModels.User,
+      on_delete=DjangoDBModels.CASCADE,
+      db_index=True
+  )
+
+
 class QuestionManager(DjangoDBModels.Manager):
   def get_by_tag(self, tag):
     return super().get_queryset().filter(tags = tag)
@@ -46,6 +67,8 @@ class Question(DjangoDBModels.Model):
     max_length   = 1000,
     verbose_name = u"Поле вопроса..."
   )
+
+  likes = GenericRelation(Like, related_query_name = 'question')
 
   create_date = DjangoDBModels.DateTimeField(
     default      = datetime.now,
@@ -76,12 +99,12 @@ class Question(DjangoDBModels.Model):
     db_index = True
   )
 
-  objects = QuestionManager()
-
   photo = DjangoDBModels.CharField(
     default     = u"/img/snegovik.jpeg",
     max_length  = 120
   )
+
+  objects = QuestionManager()
 
   def like(self, like_object):
     if like_object not in Like.objects.all():
@@ -98,6 +121,11 @@ class Question(DjangoDBModels.Model):
 
   def __str__(self):
     return self.title
+
+  def save(self, *args, **kwargs):
+    self.photo = Profile.objects.get(user = self.author).avatar
+    super(Question, self).save(*args, **kwargs)
+
 
   class Meta:
     ordering = ['-create_date']
@@ -116,6 +144,10 @@ class Answer(DjangoDBModels.Model):
   photo = DjangoDBModels.CharField(default = u"/img/me.jpg",
                            max_length = 120)
 
+  is_correct = DjangoDBModels.BooleanField(default = False)
+
+  likes = GenericRelation(Like, related_query_name = 'answer')
+
   question = DjangoDBModels.ForeignKey(
     Question,
     on_delete = DjangoDBModels.CASCADE,
@@ -132,31 +164,10 @@ class Answer(DjangoDBModels.Model):
 
   def save(self, *args, **kwargs):
     self.question.add_answer(self)
-    self.photo = Profile.objects.get(user=self.author).avatar
+    self.photo = Profile.objects.get(user = self.author).avatar
     super(Answer, self).save(*args, **kwargs)
 
   def like(self, like_object):
     if like_object not in Like.objects.all():
       self.likes_count += 1
       super(Answer, self).save()
-
-
-class Like(DjangoDBModels.Model):
-  content_type = DjangoDBModels.ForeignKey(
-    ContentType,
-    on_delete = DjangoDBModels.CASCADE
-  )
-
-  object_id = DjangoDBModels.PositiveIntegerField()
-  
-  content_object = GenericForeignKey('content_type', 'object_id')
-
-  def save(self, *args, **kwargs):
-    self.content_object.like(self)
-    super(Like, self).save(*args, **kwargs)
-
-  user = DjangoDBModels.ForeignKey(
-    DjangoAuthModels.User,
-    on_delete=DjangoDBModels.CASCADE,
-    db_index  = True
-  )
