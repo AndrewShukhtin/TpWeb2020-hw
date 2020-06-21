@@ -179,6 +179,7 @@ def hot(request):
       "user"     : request.user,
       "tags"     : get_top_tags(),
       "members"  : get_top_members(),
+      "MEDIA_URL": MEDIA_URL,
   })
 
 
